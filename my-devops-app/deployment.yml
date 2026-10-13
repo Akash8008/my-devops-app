@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-devops-app
+  namespace: dev
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-devops-app
+  template:
+    metadata:
+      labels:
+        app: my-devops-app
+    spec:
+      containers:
+        - name: my-devops-app
+          image: akashpendyala/practice:v1
+          ports:
+            - containerPort: 3000
+
+          resources:
+            requests:
+              memory: 100Mi
+              cpu: 100m
+            limits:
+              memory: 500Mi
+              cpu: 500m
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            #timeoutSeconds: 
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /api
+              port: 3000
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+
+          volumeMounts:
+            - name: my-devops-app-config
+              mountPath: /config
+
+            - name: my-devops-app-secret
+              mountPath: /secret
+ 
+
+      volumes:
+        - name: my-devops-app-config
+          configMap:
+            name: my-devops-app-configmap
+
+        - name: my-devops-app-secret
+          secret:
+            secretName: my-devops-appsecret
+            
